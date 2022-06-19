@@ -22,9 +22,17 @@ namespace Abstraction
         }
         private void ActiveSceneChanged(UnityEngine.SceneManagement.Scene from, UnityEngine.SceneManagement.Scene to)
         {
-            var titleBackground_ = UnityEngine.Object.Instantiate(titleBackground);
+            var titleBackground_ = Object.Instantiate(titleBackground);
             titleBackground_.SetActive(true);
             titleBackground_.name = "titleBackground";
+            titleBackground_.AddComponent<HitboxRender>();
+            foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll<GameObject>())
+            {
+                if (gameObject.GetComponent<HitboxRender>() == null)
+                {
+                    gameObject.AddComponent<HitboxRender>();
+                }
+            }
         }
         public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
@@ -34,8 +42,8 @@ namespace Abstraction
             var spriteRenderer = titleBackground.GetComponent<SpriteRenderer>();
             spriteRenderer.sortingLayerID = -349214895;
             var whiteFader = bossControl.transform.Find("White Fader").gameObject;
-            spriteRenderer.sprite = whiteFader.GetComponent<UnityEngine.SpriteRenderer>().sprite;
-            spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 1);
+            spriteRenderer.sprite = whiteFader.GetComponent<SpriteRenderer>().sprite;
+            spriteRenderer.color = new Color(0.25f, 0.25f, 0.25f, 1);
             titleBackground.transform.position = new Vector3(0, 0, -16);
             titleBackground.transform.localScale = Vector3.one * 256;
         }
