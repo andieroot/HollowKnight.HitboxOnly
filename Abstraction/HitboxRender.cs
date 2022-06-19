@@ -135,7 +135,14 @@ namespace Abstraction
             {
                 foreach (Collider2D collider2D in pair.Value)
                 {
-                    DrawHitbox(camera, collider2D, pair.Key, lineWidth);
+                    if (HitboxType.Other.CompareTo(pair.Key) == 0)
+                    {
+                        DrawHitbox(camera, collider2D, pair.Key, lineWidth / 2);
+                    }
+                    else
+                    {
+                        DrawHitbox(camera, collider2D, pair.Key, lineWidth);
+                    }
                 }
             }
         }
