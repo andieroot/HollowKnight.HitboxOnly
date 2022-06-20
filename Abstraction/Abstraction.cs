@@ -23,6 +23,7 @@ namespace Abstraction
             var titleBackground_ = Object.Instantiate(titleBackground);
             titleBackground_.SetActive(true);
             titleBackground_.name = "titleBackground";
+            titleBackground_.AddComponent<Follow>();
             foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll<GameObject>())
             {
                 if (gameObject.GetComponent<HitboxRender>() == null && gameObject.GetComponent<Collider2D>() != null)
@@ -42,7 +43,7 @@ namespace Abstraction
             spriteRenderer.sprite = whiteFader.GetComponent<SpriteRenderer>().sprite;
             spriteRenderer.color = new Color(0.25f, 0.25f, 0.25f, 1);
             titleBackground.transform.position = new Vector3(0, 0, -16);
-            titleBackground.transform.localScale = Vector3.one * 256;
+            titleBackground.transform.localScale = Vector3.one * 512;
         }
     }
 }
