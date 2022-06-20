@@ -38,28 +38,7 @@ namespace Abstraction
             }
         }
 
-        private readonly SortedDictionary<HitboxType, HashSet<Collider2D>> colliders = new()
-        {
-            { HitboxType.Knight, new HashSet<Collider2D>() },
-            { HitboxType.Enemy, new HashSet<Collider2D>() },
-            { HitboxType.Attack, new HashSet<Collider2D>() },
-            { HitboxType.Terrain, new HashSet<Collider2D>() },
-            { HitboxType.Trigger, new HashSet<Collider2D>() },
-            { HitboxType.Breakable, new HashSet<Collider2D>() },
-            { HitboxType.Gate, new HashSet<Collider2D>() },
-            { HitboxType.HazardRespawn, new HashSet<Collider2D>() },
-            { HitboxType.Other, new HashSet<Collider2D>() },
-        };
-
         public static float LineWidth => Math.Max(0.7f, Screen.width / 960f * GameCameras.instance.tk2dCam.ZoomFactor);
-
-        private void Start()
-        {
-            foreach (var collider2D in gameObject.GetComponents<Collider2D>())
-            {
-                TryAddHitboxes(collider2D);
-            }
-        }
 
         private Vector2 LocalToScreenPoint(Camera camera, Collider2D collider2D, Vector2 point)
         {
@@ -67,7 +46,7 @@ namespace Abstraction
             return new Vector2((int)Math.Round(result.x), (int)Math.Round(Screen.height - result.y));
         }
 
-        private void TryAddHitboxes(Collider2D collider2D)
+        private void TryAddHitboxes(SortedDictionary<HitboxType, HashSet<Collider2D>> colliders, Collider2D collider2D)
         {
             if (collider2D == null)
             {
@@ -126,6 +105,23 @@ namespace Abstraction
             if (Event.current?.type != EventType.Repaint || Camera.main == null || GameManager.instance == null || GameManager.instance.isPaused)
             {
                 return;
+            }
+
+            SortedDictionary<HitboxType, HashSet<Collider2D>> colliders = new()
+            {
+                { HitboxType.Knight, new HashSet<Collider2D>() },
+                { HitboxType.Enemy, new HashSet<Collider2D>() },
+                { HitboxType.Attack, new HashSet<Collider2D>() },
+                { HitboxType.Terrain, new HashSet<Collider2D>() },
+                { HitboxType.Trigger, new HashSet<Collider2D>() },
+                { HitboxType.Breakable, new HashSet<Collider2D>() },
+                { HitboxType.Gate, new HashSet<Collider2D>() },
+                { HitboxType.HazardRespawn, new HashSet<Collider2D>() },
+                { HitboxType.Other, new HashSet<Collider2D>() },
+            };
+            foreach (var collider2D in gameObject.GetComponents<Collider2D>())
+            {
+                TryAddHitboxes(colliders, collider2D);
             }
 
             GUI.depth = int.MaxValue;

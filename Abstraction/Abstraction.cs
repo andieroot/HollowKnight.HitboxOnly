@@ -23,10 +23,9 @@ namespace Abstraction
             var titleBackground_ = Object.Instantiate(titleBackground);
             titleBackground_.SetActive(true);
             titleBackground_.name = "titleBackground";
-            titleBackground_.AddComponent<HitboxRender>();
             foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll<GameObject>())
             {
-                if (gameObject.GetComponent<HitboxRender>() == null)
+                if (gameObject.GetComponent<HitboxRender>() == null && gameObject.GetComponent<Collider2D>() != null)
                 {
                     gameObject.AddComponent<HitboxRender>();
                 }
