@@ -10,7 +10,7 @@ namespace Abstraction
     public class HitboxRender : MonoBehaviour
     {
         // ReSharper disable once StructCanBeMadeReadOnly
-        private struct HitboxType : IComparable<HitboxType>
+        public struct HitboxType
         {
             public static readonly HitboxType Knight = new(Color.yellow, 0);                     // yellow
             public static readonly HitboxType Enemy = new(new Color(0.8f, 0, 0), 1);       // red      
@@ -21,6 +21,7 @@ namespace Abstraction
             public static readonly HitboxType Gate = new(new Color(0.0f, 0.0f, 0.5f), 6); // dark blue
             public static readonly HitboxType HazardRespawn = new(new Color(0.5f, 0.0f, 0.5f), 7); // purple 
             public static readonly HitboxType Other = new(new Color(0.9f, 0.6f, 0.4f), 8); // orange
+            public static readonly HitboxType None = new(new Color(0.9f, 0.6f, 0.4f), 9); // orange
 
 
             public readonly Color Color;
@@ -32,10 +33,6 @@ namespace Abstraction
                 Depth = depth;
             }
 
-            public int CompareTo(HitboxType other)
-            {
-                return other.Depth.CompareTo(Depth);
-            }
         }
 
         public static float LineWidth => Math.Max(0.7f, Screen.width / 960f * GameCameras.instance.tk2dCam.ZoomFactor);
@@ -46,11 +43,10 @@ namespace Abstraction
             return new Vector2((int)Math.Round(result.x), (int)Math.Round(Screen.height - result.y));
         }
 
-        private void TryAddHitboxes(SortedDictionary<HitboxType, HashSet<Collider2D>> colliders, Collider2D collider2D)
+        public static HitboxType TryAddHitboxes(Collider2D collider2D)
         {
-            if (collider2D == null)
-            {
-                return;
+             if (collider2D == null)   {  
+                return HitboxType.None;
             }
 
             if (collider2D is BoxCollider2D or PolygonCollider2D or EdgeCollider2D or CircleCollider2D)
@@ -58,46 +54,48 @@ namespace Abstraction
                 GameObject go = collider2D.gameObject;
                 if (collider2D.GetComponent<DamageHero>() || collider2D.gameObject.LocateMyFSM("damages_hero"))
                 {
-                    colliders[HitboxType.Enemy].Add(collider2D);
+                    return HitboxType.Enemy;
                 }
                 else if (go.GetComponent<HealthManager>() || go.LocateMyFSM("health_manager_enemy") || go.LocateMyFSM("health_manager"))
                 {
-                    colliders[HitboxType.Other].Add(collider2D);
+                    return HitboxType.Other;
                 }
                 else if (go.layer == (int)PhysLayers.TERRAIN)
                 {
-                    if (go.name.Contains("Breakable") || go.name.Contains("Collapse") || go.GetComponent<Breakable>() != null) colliders[HitboxType.Breakable].Add(collider2D);
-                    else colliders[HitboxType.Terrain].Add(collider2D);
+                    if (go.name.Contains("Breakable") || go.name.Contains("Collapse") || go.GetComponent<Breakable>() != null) return HitboxType.Breakable;
+                    else return HitboxType.Terrain;
                 }
                 else if (go == HeroController.instance?.gameObject && !collider2D.isTrigger)
                 {
-                    colliders[HitboxType.Knight].Add(collider2D);
+                    return HitboxType.Knight;
                 }
                 else if (go.GetComponent<DamageEnemies>() || go.LocateMyFSM("damages_enemy") || go.name == "Damager" && go.LocateMyFSM("Damage"))
                 {
-                    colliders[HitboxType.Attack].Add(collider2D);
+                    return HitboxType.Attack;
                 }
                 else if (collider2D.isTrigger && collider2D.GetComponent<HazardRespawnTrigger>())
                 {
-                    colliders[HitboxType.HazardRespawn].Add(collider2D);
+                    return HitboxType.HazardRespawn;
                 }
                 else if (collider2D.isTrigger && collider2D.GetComponent<TransitionPoint>())
                 {
-                    colliders[HitboxType.Gate].Add(collider2D);
+                    return HitboxType.Gate;
                 }
                 else if (collider2D.GetComponent<Breakable>())
                 {
                     NonBouncer bounce = collider2D.GetComponent<NonBouncer>();
                     if (bounce == null || !bounce.active)
                     {
-                        colliders[HitboxType.Trigger].Add(collider2D);
+                        return HitboxType.Trigger;
                     }
+                    return HitboxType.None;
                 }
                 else if (true)
                 {
-                    colliders[HitboxType.Other].Add(collider2D);
+                    return HitboxType.Other;
                 }
             }
+            return HitboxType.None;
         }
 
         private void OnGUI()
@@ -107,39 +105,13 @@ namespace Abstraction
                 return;
             }
 
-            SortedDictionary<HitboxType, HashSet<Collider2D>> colliders = new()
-            {
-                { HitboxType.Knight, new HashSet<Collider2D>() },
-                { HitboxType.Enemy, new HashSet<Collider2D>() },
-                { HitboxType.Attack, new HashSet<Collider2D>() },
-                { HitboxType.Terrain, new HashSet<Collider2D>() },
-                { HitboxType.Trigger, new HashSet<Collider2D>() },
-                { HitboxType.Breakable, new HashSet<Collider2D>() },
-                { HitboxType.Gate, new HashSet<Collider2D>() },
-                { HitboxType.HazardRespawn, new HashSet<Collider2D>() },
-                { HitboxType.Other, new HashSet<Collider2D>() },
-            };
-            foreach (var collider2D in gameObject.GetComponents<Collider2D>())
-            {
-                TryAddHitboxes(colliders, collider2D);
-            }
-
             GUI.depth = int.MaxValue;
             Camera camera = Camera.main;
             float lineWidth = LineWidth;
-            foreach (var pair in colliders)
+            foreach (var collider2D in gameObject.GetComponents<Collider2D>())
             {
-                foreach (Collider2D collider2D in pair.Value)
-                {
-                    if (HitboxType.Other.CompareTo(pair.Key) == 0)
-                    {
-                        DrawHitbox(camera, collider2D, pair.Key, lineWidth / 2);
-                    }
-                    else
-                    {
-                        DrawHitbox(camera, collider2D, pair.Key, lineWidth);
-                    }
-                }
+                var pairKey = TryAddHitboxes(collider2D);
+                DrawHitbox(camera, collider2D, pairKey, lineWidth);
             }
         }
 

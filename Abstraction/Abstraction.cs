@@ -26,7 +26,19 @@ namespace Abstraction
             titleBackground_.AddComponent<Follow>();
             foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll<GameObject>())
             {
-                if (gameObject.GetComponent<HitboxRender>() == null && gameObject.GetComponent<Collider2D>() != null)
+                var good = false;
+                if (gameObject.GetComponent<HitboxRender>() != null)
+                {
+                    continue;
+                }
+                foreach (var c in gameObject.GetComponents<Collider2D>())
+                {
+                    if (HitboxRender.TryAddHitboxes(c).Depth < 8)
+                    {
+                        good = true;
+                    }
+                }
+                if (good)
                 {
                     gameObject.AddComponent<HitboxRender>();
                 }
