@@ -7,8 +7,8 @@ namespace Abstraction
 {
     public class Abstraction : Mod
     {
-        public Abstraction() : base("Abstraction") { }
-        public override string GetVersion() => "1.0";
+        public Abstraction() : base("HitboxOnly") { }
+        public override string GetVersion() => "1.2.0.0";
         private void ActiveSceneChanged(UnityEngine.SceneManagement.Scene from, UnityEngine.SceneManagement.Scene to)
         {
             if(HeroController.SilentInstance != null && Camera.main.GetComponent<WhiteOcclusion>() == null)
