@@ -16,7 +16,7 @@ namespace Abstraction
                 Destroy(this);
                 return;
             }
-            Graphics.Blit(Texture2D.whiteTexture, dest);
+            Graphics.Blit(Texture2D.grayTexture, dest);
         }
     }
 }
