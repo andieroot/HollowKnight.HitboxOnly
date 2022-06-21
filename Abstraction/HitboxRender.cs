@@ -90,7 +90,7 @@ namespace Abstraction
                     }
                     return HitboxType.None;
                 }
-                else if (true)
+                else
                 {
                     return HitboxType.Other;
                 }
