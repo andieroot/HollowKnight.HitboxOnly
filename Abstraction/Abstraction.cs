@@ -8,10 +8,14 @@ namespace Abstraction
     public class Abstraction : Mod
     {
         public Abstraction() : base("HitboxOnly") { }
-        public override string GetVersion() => "1.2.0.0";
-        private void ActiveSceneChanged(UnityEngine.SceneManagement.Scene from, UnityEngine.SceneManagement.Scene to)
+        public override string GetVersion() => "1.3.0.0";
+        public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
-            if(HeroController.SilentInstance != null && Camera.main.GetComponent<WhiteOcclusion>() == null)
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += SceneManager_sceneLoaded;
+        }
+        private void SceneManager_sceneLoaded(UnityEngine.SceneManagement.Scene arg0, UnityEngine.SceneManagement.LoadSceneMode arg1)
+        {
+            if (HeroController.SilentInstance != null && Camera.main.GetComponent<WhiteOcclusion>() == null)
             {
                 Camera.main.gameObject.AddComponent<WhiteOcclusion>();
             }
@@ -34,10 +38,6 @@ namespace Abstraction
                     gameObject.AddComponent<HitboxRender>();
                 }
             }
-        }
-        public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
-        {
-            UnityEngine.SceneManagement.SceneManager.activeSceneChanged += ActiveSceneChanged;
         }
     }
 }
